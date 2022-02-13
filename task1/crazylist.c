@@ -52,8 +52,13 @@ uint64_t *insert_sorted(uint64_t *list, uint64_t n) {
         return cons(n, list);
     }
 
-    while (current != NULL && *(enclosing_struct(current)->cdr) < n){
+    while ((enclosing_struct(current)->cdr) != NULL && *(enclosing_struct(current)->cdr) < n){
         current = enclosing_struct(current)->cdr;
+    }
+
+    if ((enclosing_struct(current)->cdr) == NULL){
+        enclosing_struct(current)->cdr = cons(n, NULL);
+        return list;
     }
 
     uint64_t *nextCell = enclosing_struct(current)->cdr;
