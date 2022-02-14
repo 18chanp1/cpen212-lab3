@@ -29,11 +29,22 @@ void *cpen212_alloc(void *alloc_state, size_t nbytes) {
     size_t aligned_sz = (nbytes + 7) & ~7;
 
     unsigned long long int *currentBlock = s->head;
+    printf("%llu, \n", nbytes);
 
-    while((*currentBlock & 1) && (currentBlock + 8 < s->end) && 
-            *currentBlock > aligned_sz){
-        currentBlock = currentBlock + *currentBlock;
+    while((*currentBlock & 1 || *currentBlock < aligned_sz) && (currentBlock + *currentBlock + 8 < s->end)){
+        // printf("End %llu \ n", s->end);
+        // printf("Size: %llu \n", *currentBlock);
+        // printf("address: %llu \n", currentBlock);
+        if(*currentBlock & 1){
+            currentBlock = currentBlock + *currentBlock - 1;
+        } else {
+            currentBlock = currentBlock + *currentBlock;
+        }
+        
+        
     }
+
+    printf("%llu, \n", currentBlock);
 
     if(currentBlock + 8 >= s->end || 
         currentBlock + aligned_sz + 8 > s ->end 
@@ -43,7 +54,14 @@ void *cpen212_alloc(void *alloc_state, size_t nbytes) {
 
     void *memblock = currentBlock + 8;
 
+    unsigned long long int *nxtBlock = currentBlock + aligned_sz + 8;
+
+    *(unsigned long long int *)nxtBlock = *currentBlock - aligned_sz - 8;
+
     *(unsigned long long int *)currentBlock = aligned_sz + 8 + 1;
+
+    printf("BlockSize: %llu \n", *currentBlock);
+
 
     return currentBlock + 8;
 
