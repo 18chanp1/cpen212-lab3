@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "cpen212alloc.h"
+//#include <unistd.h>
 
 typedef struct {
     void *end;   // end of heap
@@ -13,6 +14,7 @@ void *cpen212_init(void *heap_start, void *heap_end) {
     s->end = heap_end;
     s->free = heap_start;
     s->head = heap_start;
+
 
     //header block
     *(unsigned long long int *)s->head = heap_end - heap_start;  // store int value 10 at address 0x16
@@ -29,12 +31,16 @@ void *cpen212_alloc(void *alloc_state, size_t nbytes) {
     size_t aligned_sz = (nbytes + 7) & ~7;
 
     unsigned long long int *currentBlock = s->head;
-    printf("%llu, \n", nbytes);
 
-    while((*currentBlock & 1 || *currentBlock < aligned_sz) && (currentBlock + *currentBlock + 8 < s->end)){
-        // printf("End %llu \ n", s->end);
-        // printf("Size: %llu \n", *currentBlock);
-        // printf("address: %llu \n", currentBlock);
+    printf ("Head: %llu \n", currentBlock);
+
+    while((*currentBlock & 1 || *currentBlock < aligned_sz + 8) && (currentBlock + (*currentBlock) < s->end)){
+        
+        printf("Traverse Block: %llu \n", currentBlock);
+        printf("Ta Block: %llu \n", *currentBlock);
+        printf("Tail: %llu \n", s->end);
+        
+        sleep(1);
         if(*currentBlock & 1){
             currentBlock = currentBlock + *currentBlock - 1;
         } else {
@@ -44,23 +50,21 @@ void *cpen212_alloc(void *alloc_state, size_t nbytes) {
         
     }
 
-    printf("%llu, \n", currentBlock);
-
-    if(currentBlock + 8 >= s->end || 
-        currentBlock + aligned_sz + 8 > s ->end 
-        || nbytes < 0){
+    if(currentBlock + aligned_sz + 8 > s ->end 
+        || nbytes < 0 || *currentBlock & 1){
         return NULL;
     }
 
-    void *memblock = currentBlock + 8;
+    unsigned long long int size = *currentBlock;
+    size *=8;
+
+    printf ("Assigned Block: %llu \n", currentBlock);
 
     unsigned long long int *nxtBlock = currentBlock + aligned_sz + 8;
 
-    *(unsigned long long int *)nxtBlock = *currentBlock - aligned_sz - 8;
+    *(unsigned long long int *)nxtBlock = size - aligned_sz - 8;
 
     *(unsigned long long int *)currentBlock = aligned_sz + 8 + 1;
-
-    printf("BlockSize: %llu \n", *currentBlock);
 
 
     return currentBlock + 8;
@@ -75,9 +79,14 @@ void *cpen212_alloc(void *alloc_state, size_t nbytes) {
 }
 
 void cpen212_free(void *alloc_state, void *p) {
-    unsigned long long *currentblock = p - 8;
-    *currentblock--;
+    printf("p: %llu \n", p);
+    void *ptr = p - 64;
+    unsigned long long int *currentblock = (unsigned long long int *) ptr;
+    *(unsigned long long int *) currentblock = *currentblock - 1;
+    printf("End of free: %llu @ %llu \n", *currentblock, currentblock);
  }
+
+ 
 
 void *cpen212_realloc(void *alloc_state, void *prev, size_t nbytes) {
     //get header
@@ -117,3 +126,31 @@ bool cpen212_check_consistency(void *alloc_state) {
     alloc_state_t *s = (alloc_state_t *) alloc_state;
     return s->end > s->free;
 }
+
+// int main(void){
+//     void *ptr = malloc(4096);
+//     struct alloc_state_s *jones = cpen212_init(ptr, ptr+4096);
+
+//     void * c1 = cpen212_alloc(jones, 504);
+//     void * c2 = cpen212_alloc(jones, 16);
+
+    
+
+    
+    
+
+//     cpen212_free(jones, c1);
+//      cpen212_free(jones, c2);
+
+//     c1 = cpen212_alloc(jones, 4028);
+//     c2 = cpen212_alloc(jones, 16);
+
+//     unsigned long long int size1 = *(unsigned long long int *)(c1 - 64);
+//     unsigned long long int size2 = *(unsigned long long int *)(c2 - 64);
+
+
+//     printf("s1: %llu", size1);
+//     printf("end: %llu \n", ptr + 4096);
+
+
+// }
