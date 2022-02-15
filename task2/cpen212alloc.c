@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "cpen212alloc.h"
-//#include <unistd.h>
+#include <unistd.h>>
 
 typedef struct {
     void *end;   // end of heap
@@ -30,45 +30,61 @@ void *cpen212_alloc(void *alloc_state, size_t nbytes) {
     alloc_state_t *s = (alloc_state_t *) alloc_state;
     size_t aligned_sz = (nbytes + 7) & ~7;
 
-    unsigned long long int *currentBlock = s->head;
+    unsigned long long int* currentBlock = s->head;
 
     printf ("Head: %llu \n", currentBlock);
 
     while((*currentBlock & 1 || *currentBlock < aligned_sz + 8) && (currentBlock + (*currentBlock) < s->end)){
-        
+        //sleep(1);
         printf("Traverse Block: %llu \n", currentBlock);
         printf("Ta Block: %llu \n", *currentBlock);
         printf("Tail: %llu \n", s->end);
         
-        sleep(1);
         if(*currentBlock & 1){
-            currentBlock = currentBlock + *currentBlock - 1;
+            currentBlock = currentBlock + ((*currentBlock) - 1);
         } else {
-            currentBlock = currentBlock + *currentBlock;
+            currentBlock = currentBlock + (*currentBlock);
         }
         
         
     }
 
+    printf ("nullchk, %llu \n", *currentBlock);
     if(currentBlock + aligned_sz + 8 > s ->end 
-        || nbytes < 0 || *currentBlock & 1){
+        || nbytes < 0 || *currentBlock & 1 || *currentBlock < aligned_sz + 8){
+        
         return NULL;
     }
 
     unsigned long long int size = *currentBlock;
-    size *=8;
+    //size *=8;
 
     printf ("Assigned Block: %llu \n", currentBlock);
 
-    unsigned long long int *nxtBlock = currentBlock + aligned_sz + 8;
 
-    *(unsigned long long int *)nxtBlock = size - aligned_sz - 8;
+    if (*currentBlock == aligned_sz + 8){
+        *currentBlock++;
+        return currentBlock + 8;
+    }
+    if (*currentBlock > aligned_sz + 8) {
+        unsigned long long *splitBlock = currentBlock + 8 + aligned_sz;
+        *(unsigned long long int *)splitBlock = *currentBlock - aligned_sz - 8;
 
-    *(unsigned long long int *)currentBlock = aligned_sz + 8 + 1;
+        *(unsigned long long int *)currentBlock = aligned_sz + 1 + 8;
+
+        *currentBlock++;
+
+        return currentBlock + 8;
+    }
+
+    // unsigned long long int *nxtBlock = currentBlock + aligned_sz + 8;
+
+    // *(unsigned long long int *)nxtBlock = size - aligned_sz - 8;
+
+    // *(unsigned long long int *)currentBlock = aligned_sz + 8 + 1;
 
 
-    return currentBlock + 8;
-
+    // return currentBlock + 8;
 
 
     // void *p = s->free;
@@ -95,7 +111,7 @@ void *cpen212_realloc(void *alloc_state, void *prev, size_t nbytes) {
     if (*oldBlock == aligned_sz){
         return prev;
     }
-    if (*oldBlock > aligned_sz) {
+    if (*oldBlock < aligned_sz) {
         unsigned long long *splitBlock = oldBlock + 8 + aligned_sz;
         *(unsigned long long int *)splitBlock = *oldBlock - aligned_sz - 8;
 
@@ -131,25 +147,28 @@ bool cpen212_check_consistency(void *alloc_state) {
 //     void *ptr = malloc(4096);
 //     struct alloc_state_s *jones = cpen212_init(ptr, ptr+4096);
 
-//     void * c1 = cpen212_alloc(jones, 504);
-//     void * c2 = cpen212_alloc(jones, 16);
-
-    
-
-    
-    
+//     void * c1 = cpen212_alloc(jones, 32);
+//     void * c2 = cpen212_alloc(jones, 69);
 
 //     cpen212_free(jones, c1);
-//      cpen212_free(jones, c2);
+//     cpen212_free(jones, c2);
 
-//     c1 = cpen212_alloc(jones, 4028);
-//     c2 = cpen212_alloc(jones, 16);
+    
+//      printf("c2: %llu \n", *(unsigned long long int *)(c2 - 64) );
+//     void * c11 = cpen212_alloc(jones, 69);
+//      printf("c2: %llu \n", *(unsigned long long int *)(c2 - 64) );
+//     void * c21 = cpen212_alloc(jones, 32);
+//     printf("c2: %llu \n", *(unsigned long long int *)(c2 - 64) );
+//     void * c3 = cpen212_alloc(jones, 3000000);
 
 //     unsigned long long int size1 = *(unsigned long long int *)(c1 - 64);
 //     unsigned long long int size2 = *(unsigned long long int *)(c2 - 64);
+//     unsigned long long int size3 = *(unsigned long long int *)(c3 - 64);
 
 
-//     printf("s1: %llu", size1);
+//     printf("s1: %llu ", size1);
+//     printf("s2: %llu ", size2);
+//     printf("s3: %llu ", size3);
 //     printf("end: %llu \n", ptr + 4096);
 
 
