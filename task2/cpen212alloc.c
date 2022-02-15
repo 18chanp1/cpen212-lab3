@@ -63,7 +63,7 @@ void *cpen212_alloc(void *alloc_state, size_t nbytes) {
 
 
     if (*currentBlock == aligned_sz + 8){
-        *currentBlock++;
+        (*currentBlock)++;
         return currentBlock + 8;
     }
     if (*currentBlock > aligned_sz + 8) {
@@ -72,9 +72,7 @@ void *cpen212_alloc(void *alloc_state, size_t nbytes) {
 
         *(unsigned long long int *)currentBlock = aligned_sz + 1 + 8;
 
-        *currentBlock++;
-
-        return currentBlock + 8;
+        return currentBlock + 8; //incremented
     }
 
     // unsigned long long int *nxtBlock = currentBlock + aligned_sz + 8;
@@ -159,7 +157,7 @@ bool cpen212_check_consistency(void *alloc_state) {
 //      printf("c2: %llu \n", *(unsigned long long int *)(c2 - 64) );
 //     void * c21 = cpen212_alloc(jones, 32);
 //     printf("c2: %llu \n", *(unsigned long long int *)(c2 - 64) );
-//     void * c3 = cpen212_alloc(jones, 3000000);
+//     void * c3 = cpen212_alloc(jones, 20);
 
 //     unsigned long long int size1 = *(unsigned long long int *)(c1 - 64);
 //     unsigned long long int size2 = *(unsigned long long int *)(c2 - 64);
