@@ -34,23 +34,24 @@ void *cpen212_alloc(void *alloc_state, size_t nbytes) {
 
     printf ("Head: %llu \n", currentBlock);
 
-    while((*currentBlock & 1 || *currentBlock < aligned_sz + 8) && (currentBlock + (*currentBlock) < s->end)){
+    while((*currentBlock & 1 || *currentBlock < aligned_sz + 8) && (currentBlock + (*currentBlock) / 8 < s->end)){
         //sleep(1);
         printf("Traverse Block: %llu \n", currentBlock);
         printf("Ta Block: %llu \n", *currentBlock);
         printf("Tail: %llu \n", s->end);
         
         if(*currentBlock & 1){
-            currentBlock = currentBlock + ((*currentBlock) - 1);
+            currentBlock = currentBlock + ((*currentBlock) - 1)/8;
         } else {
-            currentBlock = currentBlock + (*currentBlock);
+            currentBlock = currentBlock + (*currentBlock)/8;
         }
         
         
     }
 
+    unsigned long long int t = aligned_sz + 8;
     printf ("nullchk, %llu \n", *currentBlock);
-    if(currentBlock + aligned_sz + 8 > s ->end 
+    if(currentBlock + t/8 + 1> s ->end 
         || nbytes < 0 || *currentBlock & 1 || *currentBlock < aligned_sz + 8){
         
         return NULL;
@@ -63,16 +64,20 @@ void *cpen212_alloc(void *alloc_state, size_t nbytes) {
 
 
     if (*currentBlock == aligned_sz + 8){
+        
         (*currentBlock)++;
-        return currentBlock + 8;
+        return currentBlock + 1;
     }
     if (*currentBlock > aligned_sz + 8) {
-        unsigned long long *splitBlock = currentBlock + 8 + aligned_sz;
+        unsigned long long temp = 1 + aligned_sz + 8;
+        unsigned long long* splitBlock = currentBlock + temp / 8;
+        printf ("Splitblokc %p", splitBlock);
         *(unsigned long long int *)splitBlock = *currentBlock - aligned_sz - 8;
-
+        printf ("Splitblokc Val %llu \n", *splitBlock);
+        
         *(unsigned long long int *)currentBlock = aligned_sz + 1 + 8;
 
-        return currentBlock + 8; //incremented
+        return currentBlock + 1; //incremented
     }
 
     // unsigned long long int *nxtBlock = currentBlock + aligned_sz + 8;
@@ -94,7 +99,7 @@ void *cpen212_alloc(void *alloc_state, size_t nbytes) {
 
 void cpen212_free(void *alloc_state, void *p) {
     printf("p: %llu \n", p);
-    void *ptr = p - 64;
+    void *ptr = p - 8;
     unsigned long long int *currentblock = (unsigned long long int *) ptr;
     *(unsigned long long int *) currentblock = *currentblock - 1;
     printf("End of free: %llu @ %llu \n", *currentblock, currentblock);
@@ -105,20 +110,26 @@ void cpen212_free(void *alloc_state, void *p) {
 void *cpen212_realloc(void *alloc_state, void *prev, size_t nbytes) {
     //get header
     size_t aligned_sz = (nbytes + 7) & ~7;
-    unsigned long long* oldBlock = prev-8;
-    if (*oldBlock == aligned_sz){
+    unsigned long long* oldBlock = (unsigned long long int *)prev - 1;
+    if (*oldBlock == aligned_sz + 8){
         return prev;
     }
-    if (*oldBlock < aligned_sz) {
-        unsigned long long *splitBlock = oldBlock + 8 + aligned_sz;
-        *(unsigned long long int *)splitBlock = *oldBlock - aligned_sz - 8;
-
-        *(unsigned long long int *)oldBlock = aligned_sz + 1 + 8;
+    if (*oldBlock > aligned_sz + 8) {
+        unsigned long long temp = 1 + aligned_sz + 8;
+        unsigned long long* splitBlock = oldBlock + (temp / 8) ;
+        printf ("BLOCKER %p", splitBlock);
+        *(unsigned long long int *)splitBlock = *oldBlock - aligned_sz - 9;
+        printf ("BLOCKER Val %llu \n", *splitBlock);
+        
+        *(unsigned long long int *)oldBlock = aligned_sz + 8 + 1;
 
         return prev;
     }
-    if (*oldBlock > aligned_sz){
+    if (*oldBlock < aligned_sz){
         void * newPtr = cpen212_alloc(alloc_state, aligned_sz);
+        if (newPtr == NULL){
+            return NULL;
+        }
         memmove(newPtr, prev, *oldBlock - 8);
     }
 
@@ -152,16 +163,16 @@ bool cpen212_check_consistency(void *alloc_state) {
 //     cpen212_free(jones, c2);
 
     
-//      printf("c2: %llu \n", *(unsigned long long int *)(c2 - 64) );
+//      printf("c2: %llu \n", *(unsigned long long int *)(c2 - 8) );
 //     void * c11 = cpen212_alloc(jones, 69);
-//      printf("c2: %llu \n", *(unsigned long long int *)(c2 - 64) );
+//      printf("c2: %llu \n", *(unsigned long long int *)(c2 - 8) );
 //     void * c21 = cpen212_alloc(jones, 32);
-//     printf("c2: %llu \n", *(unsigned long long int *)(c2 - 64) );
+//     printf("c2: %llu \n", *(unsigned long long int *)(c2 - 8) );
 //     void * c3 = cpen212_alloc(jones, 20);
 
-//     unsigned long long int size1 = *(unsigned long long int *)(c1 - 64);
-//     unsigned long long int size2 = *(unsigned long long int *)(c2 - 64);
-//     unsigned long long int size3 = *(unsigned long long int *)(c3 - 64);
+//     unsigned long long int size1 = *(unsigned long long int *)(c1 - 8);
+//     unsigned long long int size2 = *(unsigned long long int *)(c2 - 8);
+//     unsigned long long int size3 = *(unsigned long long int *)(c3 - 8);
 
 
 //     printf("s1: %llu ", size1);
