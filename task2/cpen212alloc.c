@@ -118,14 +118,14 @@ void *cpen212_realloc(void *alloc_state, void *prev, size_t nbytes) {
         unsigned long long temp = 1 + aligned_sz + 8;
         unsigned long long* splitBlock = oldBlock + (temp / 8) ;
         printf ("BLOCKER %p", splitBlock);
-        *(unsigned long long int *)splitBlock = *oldBlock - aligned_sz - 9;
+        *(unsigned long long int *)splitBlock = *oldBlock - aligned_sz - 8;
         printf ("BLOCKER Val %llu \n", *splitBlock);
         
         *(unsigned long long int *)oldBlock = aligned_sz + 8 + 1;
 
         return prev;
     }
-    if (*oldBlock < aligned_sz){
+    if (*oldBlock < aligned_sz + 8){
         void * newPtr = cpen212_alloc(alloc_state, aligned_sz);
         if (newPtr == NULL){
             return NULL;
