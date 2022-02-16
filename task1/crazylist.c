@@ -76,8 +76,8 @@ void print_list(uint64_t *list) {
 
 
     while(current != NULL){
-        printf("%llu ", *current);
-        current = enclosing_struct(current)->cdr;
+        printf("%llu ", first(current));
+        current = rest(current);
     }
 
     printf("\n");
@@ -91,18 +91,18 @@ void print_list(uint64_t *list) {
 
 //delete later
 
-// int main(){
-//     uint64_t *list = cons(100, NULL);
-//     list = cons(30, list);
-//     list = cons(10, list);
-//     list = cons(5, list);
-//     print_list(list); // output: 5 10 30 100
-//     list = insert_sorted(list, 50);
-//     print_list(list); // output: 5 10 30 50 100
-//     *find(list, 10) = 20;
-//     print_list(list); // output: 5 20 30 50 100
-//     list = insert_sorted(list, 1);
-//     print_list(list); // output: 1 5 20 30 50 100
-//     list = insert_sorted(list, 101);
-//     print_list(list); // output: 1 5 20 30 50 100 500
-// }
+int main(){
+    uint64_t *list = cons(100, NULL);
+    list = cons(30, list);
+    list = cons(10, list);
+    list = cons(5, list);
+    print_list(list); // output: 5 10 30 100
+    list = insert_sorted(list, 50);
+    print_list(list); // output: 5 10 30 50 100
+    *find(list, 10) = 20;
+    print_list(list); // output: 5 20 30 50 100
+    list = insert_sorted(list, 1);
+    print_list(list); // output: 1 5 20 30 50 100
+    list = insert_sorted(list, 101);
+    print_list(list); // output: 1 5 20 30 50 100 500
+}
