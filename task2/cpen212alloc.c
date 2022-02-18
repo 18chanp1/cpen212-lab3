@@ -109,6 +109,10 @@ void *cpen212_realloc(void *alloc_state, void *prev, size_t nbytes) {
             return NULL;
         }
         memmove(newPtr, prev, *oldBlock - 8);
+
+        (*oldBlock)--;
+
+        return newPtr;
     }
 
 

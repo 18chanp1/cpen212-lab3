@@ -136,7 +136,11 @@ void *cpen212_realloc(void *alloc_state, void *prev, size_t nbytes) {
         if(newPtr == NULL){
             return NULL;
         }
-        memmove(newPtr, prev, *oldBlock - 16);
+        memmove(newPtr, prev, *oldBlock - 1);
+        printf("moved mem \n");
+        *(oldBlock)--;
+        *(footer)--;
+        return newPtr;
     }
 
 

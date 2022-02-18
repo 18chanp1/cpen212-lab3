@@ -41,6 +41,7 @@ void *cpen212_alloc(void *alloc_state, size_t nbytes) {
     unsigned long long int* footer;
 
     while((*currentBlock & 1 || *currentBlock < aligned_sz + 16) && ((void *)currentBlock + (*currentBlock) < s->end)){
+        printf("Traverse Size: %llu \n", *currentBlock);
         
         if(*currentBlock & 1){
             currentBlock = (void *)currentBlock + ((*currentBlock) - 1);
@@ -50,6 +51,8 @@ void *cpen212_alloc(void *alloc_state, size_t nbytes) {
         
         
     }
+
+    printf("Assigned: %llu \n", currentBlock);
 
     if((void *)currentBlock + aligned_sz + 16 > s ->end 
         || nbytes < 0 || *currentBlock & 1 || *currentBlock < aligned_sz + 16){
@@ -133,7 +136,7 @@ void *cpen212_realloc(void *alloc_state, void *prev, size_t nbytes) {
     //get header
     size_t aligned_sz = (nbytes + 7) & ~7;
     unsigned long long* oldBlock = prev-8;
-    unsigned long long* footer = (void *)oldBlock + *oldBlock - 9;
+    unsigned long long* footer = (void *)oldBlock + *oldBlock -  8 - 1;
     if (*oldBlock == aligned_sz + 16){
         return prev;
     }
@@ -150,11 +153,16 @@ void *cpen212_realloc(void *alloc_state, void *prev, size_t nbytes) {
         return prev;
     }
     if (*oldBlock < aligned_sz + 16){
+        printf("newblock \n");
         void * newPtr = cpen212_alloc(alloc_state, aligned_sz);
         if(newPtr == NULL){
             return NULL;
         }
-        memmove(newPtr, prev, *oldBlock - 16);
+        memmove(newPtr, prev, *oldBlock - 1);
+        printf("moved mem \n");
+        *(oldBlock)--;
+        *(footer)--;
+        return newPtr;
     }
 
 
